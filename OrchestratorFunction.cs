@@ -7,51 +7,41 @@ using Microsoft.Extensions.Logging;
 
 namespace bn.azurefuncs
 {
-    public static class OrchestratorFunction
+    public static class Orchestrator
     {
-        [Function(nameof(OrchestratorFunction))]
+        [Function(nameof(Orchestrator))]
         public static async Task<List<string>> RunOrchestrator(
             [OrchestrationTrigger] TaskOrchestrationContext context)
         {
-            ILogger logger = context.CreateReplaySafeLogger(nameof(OrchestratorFunction));
-            logger.LogInformation("Saying hello.");
+            ILogger logger = context.CreateReplaySafeLogger(nameof(Orchestrator));
+            logger.LogInformation("Saying hello from main Orchestrator.");
             var outputs = new List<string>();
 
-            // Replace name and input with values relevant for your Durable Functions Activity
-            outputs.Add(await context.CallActivityAsync<string>(nameof(RunAsync), "Tokyo"));
-            outputs.Add(await context.CallActivityAsync<string>(nameof(RunAsync), "Seattle"));
-            outputs.Add(await context.CallActivityAsync<string>(nameof(RunAsync), "London"));
+            // Get the index passed when orchestration was scheduled
+            int index = context.GetInput<int>();
 
-            // returns ["Hello Tokyo!", "Hello Seattle!", "Hello London!"]
+            // Replace name and input with values relevant for your Durable Functions Activity
+            outputs.Add(await context.CallActivityAsync<string>("ActivityFunction", index));
+
             return outputs;
         }
 
-        [Function("ActivityFunction")]
-        public static async Task<string> RunAsync([ActivityTrigger] int index, FunctionContext executionContext)
-        {
-            ILogger logger = executionContext.GetLogger("ActivityFunction");
-            logger.LogInformation($"[{index}] - Starting simulated workload.");
-            await Task.Delay(TimeSpan.FromMinutes(5)); // Simulate 5 min processing
-            logger.LogInformation($"[{index}] - Completed workload.");
-            return $"Completed run index {index}!";
-        }
-
-        [Function("OrchestratorFunction_HttpStart")]
+        [Function("Orchestrator_HttpStart")]
         public static async Task<HttpResponseData> HttpStart(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequestData req,
             [DurableClient] DurableTaskClient client,
             FunctionContext executionContext)
         {
-            ILogger logger = executionContext.GetLogger("OrchestratorFunction_HttpStart");
+            ILogger logger = executionContext.GetLogger("Orchestrator_HttpStart");
 
-            int totalRequests = 200;
+            int totalRequests = 20000;
 
             var tasks = new List<Task>();
 
             for (int i = 0; i < totalRequests; i++)
             {
-                var instanceId = await client.ScheduleNewOrchestrationInstanceAsync(nameof(OrchestratorFunction), i);
-                logger.LogInformation($"Started orchestration with ID = '{instanceId}'.");
+                var instanceId = await client.ScheduleNewOrchestrationInstanceAsync(nameof(Orchestrator), i);
+                logger.LogInformation($"Started main orchestrator with ID = '{instanceId}'.");
             }
 
             var response = req.CreateResponse(System.Net.HttpStatusCode.OK);
