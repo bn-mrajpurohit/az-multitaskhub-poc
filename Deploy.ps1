@@ -4,7 +4,7 @@ $SUBSCRIPTION = "Codeus Non-Production"
 # az login
 # az account set -s $SUBSCRIPTION
 
-$RESOURCE_GROUP = "test-mrajpur-taskhubs"
+$RESOURCE_GROUP = "test-mrajpur-taskhubs2" 
 $LOCATION = "eastus2" # change this to a location near you, (use az account list-locations -o table)
 
 # create a resource group

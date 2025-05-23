@@ -11,7 +11,7 @@
   },
   "extensions": {
     "durableTask": {
-      "hubName": "TaskHubMain",
+      "hubName": "TaskHubB",
       "storageProvider": {
         "type": "AzureStorage"
       }
