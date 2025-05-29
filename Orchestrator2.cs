@@ -34,7 +34,7 @@ namespace bn.azurefuncs
         {
             ILogger logger = executionContext.GetLogger("Orchestrator2_HttpStart");
 
-            int totalRequests = 10000;
+            int totalRequests = 10; //10000
 
             var tasks = new List<Task>();
 
@@ -45,7 +45,7 @@ namespace bn.azurefuncs
             }
 
             var response = req.CreateResponse(System.Net.HttpStatusCode.OK);
-            await response.WriteStringAsync($"{totalRequests} orchestrations triggered.");
+            await response.WriteStringAsync($"{totalRequests} orchestrations triggered from Orchestrator2.");
             return response;
             // Returns an HTTP 202 response with an instance management payload.
             // See https://learn.microsoft.com/azure/azure-functions/durable/durable-functions-http-api#start-orchestration
